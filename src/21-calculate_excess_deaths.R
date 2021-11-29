@@ -148,7 +148,8 @@ excess$excess_measures <-
     
     return(timeseries_of_measures)
     
-  })
+  }) %>%
+  ungroup()
 
 # each measure*model in its own column
 excess$excess_measures_wide <-
@@ -325,6 +326,7 @@ de_cumpsc <-
   filter(region_iso == ps$region_iso, age_group == 'Total') %>%
   mutate(date = ISOWeekDateToDate(iso_year, iso_week)) %>%
   rename(
+    psc = 'psc_wkl_q50',
     q05 = paste0(ps$measure, '_', ps$timebase, '_q05'),
     q25 = paste0(ps$measure, '_', ps$timebase, '_q25'),
     q50 = paste0(ps$measure, '_', ps$timebase, '_q50'),
@@ -340,6 +342,12 @@ de_cumpsc <-
     aes(ymax = q75, ymin = q25),
     fill = prismatic::clr_lighten('blue', shift = 0.5)
   ) +
+  geom_line(
+    aes(y = q50, group = model_id2),
+    color = 'grey80', alpha = 0.5,
+    data = . %>% rename(model_id2 = model_id)
+  ) +
+  #geom_point(aes(y = psc)) +
   geom_line(aes(y = q50)) +
   geom_hline(yintercept = 0, color = 'grey20') +
   facet_grid(sex ~ model_id) +
@@ -348,13 +356,15 @@ de_cumpsc <-
     limits = as.Date(c('2020-03-01', '2020-12-31'))
   ) +
   scale_y_continuous(breaks = seq(-0.1, 0.1, 0.05), labels = scales::percent) +
-  figspec$MyGGplotTheme() +
+  coord_cartesian(ylim = c(-0.1, 0.1)) +
+  figspec$MyGGplotTheme(family = 'roboto', panel_border = TRUE) +
   labs(
     x = NULL,
     title = 'Cumulative percent excess death March 2020 through December 2020 in Germany',
     y = 'Cumulative P-score',
     caption = '95 and 50% prediction intervals\nAVC: 5 year avg. weekly death counts\nAVR: 5 year avg. weekly death rates\nGAM: Quasi-Poisson regression with smooth seasonality and control for mortality trends and population structure\nLGM: Quasi-Poisson regression with smooth seasonality, autocorrelation, and control for mortality trends and population structure\nSRF: Quasi-Poisson regression in Serfling specification trained on all weeks with control for population structure'
   )
+de_cumpsc
 
 ExportFigure(
   de_cumpsc, path = path$out, filename = 'de_cumpsc',
