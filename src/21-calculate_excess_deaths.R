@@ -21,6 +21,8 @@ path <- list(
 # global functions and constants
 source(path$glob)
 
+fig <- list()
+
 # Load data -------------------------------------------------------
 
 # load data on predicted death counts
@@ -184,156 +186,35 @@ excess$excess_measures_for_export <-
 
 saveRDS(excess$excess_measures_for_export, path$excess)
 
-# Plot XPC --------------------------------------------------------
+# P-scores --------------------------------------------------------
 
-ps <- list(
-  region_iso = 'DE',
-  model_id = 'lgm',
-  timebase = 'wkl'
-)
+fig$pscores <- list()
 
-excess$excess_measures_wide %>%
-  filter(region_iso == ps$region_iso) %>%
-  mutate(date = ISOWeekDateToDate(iso_year, iso_week)) %>%
-  rename(
-    q05 = paste0('xpc_', ps$timebase, '_q05_', ps$model_id),
-    q25 = paste0('xpc_', ps$timebase, '_q25_', ps$model_id),
-    q50 = paste0('xpc_', ps$timebase, '_q50_', ps$model_id),
-    q75 = paste0('xpc_', ps$timebase, '_q75_', ps$model_id),
-    q95 = paste0('xpc_', ps$timebase, '_q95_', ps$model_id),
-    obs = paste0('obs_', ps$timebase)
-  ) %>%
-  ggplot(aes(x = date)) +
-  geom_ribbon(
-    aes(ymax = q95, ymin = q05),
-    fill = prismatic::clr_lighten('blue', shift = 0.7)
-  ) +
-  geom_ribbon(
-    aes(ymax = q75, ymin = q25),
-    fill = prismatic::clr_lighten('blue', shift = 0.5)
-  ) +
-  geom_line(aes(y = q50)) +
-  geom_point(aes(y = obs)) +
-  geom_hline(yintercept = 0, color = 'grey20') +
-  facet_grid(age_group ~ sex, scales = 'free_y') +
-  scale_x_date(
-    date_breaks = '1 year', date_labels = '%Y',
-    limits = as.Date(c('2020-03-01', '2021-05-01'))
-  ) +
-  figspec$MyGGplotTheme(axis = '') +
-  theme(panel.background = element_rect(fill = 'grey95', color = NA)) +
-  labs(
-    title = paste(ps$region_iso, ps$model_id),
-    y = paste('xpc', ps$timebase)
-  )
-
-# Plot xc1 --------------------------------------------------------
-
-ps <- list(
-  region_iso = 'DE',
-  model_id = 'lgm',
-  timebase = 'wkl'
-)
-
-excess$excess_measures_wide %>%
-  filter(region_iso == ps$region_iso) %>%
-  mutate(date = ISOWeekDateToDate(iso_year, iso_week)) %>%
-  rename(
-    q05 = paste0('xc1_', ps$timebase, '_q05_', ps$model_id),
-    q25 = paste0('xc1_', ps$timebase, '_q25_', ps$model_id),
-    q50 = paste0('xc1_', ps$timebase, '_q50_', ps$model_id),
-    q75 = paste0('xc1_', ps$timebase, '_q75_', ps$model_id),
-    q95 = paste0('xc1_', ps$timebase, '_q95_', ps$model_id)
-  ) %>%
-  ggplot(aes(x = date)) +
-  geom_ribbon(
-    aes(ymax = q95, ymin = q05),
-    fill = prismatic::clr_lighten('blue', shift = 0.7)
-  ) +
-  geom_ribbon(
-    aes(ymax = q75, ymin = q25),
-    fill = prismatic::clr_lighten('blue', shift = 0.5)
-  ) +
-  geom_line(aes(y = q50)) +
-  geom_hline(yintercept = 0, color = 'grey20') +
-  facet_grid(age_group ~ sex, scales = 'free_y') +
-  scale_x_date(
-    date_breaks = '1 year', date_labels = '%Y',
-    limits = as.Date(c('2020-03-01', '2021-05-01'))
-  ) +
-  figspec$MyGGplotTheme() +
-  labs(
-    title = paste(ps$region_iso, ps$model_id),
-    y = paste('xc1', ps$timebase)
-  )
-
-# Plot xc2 --------------------------------------------------------
-
-ps <- list(
-  region_iso = 'DE',
-  model_id = 'lgm',
-  timebase = 'wkl'
-)
-
-excess$excess_measures_wide %>%
-  filter(region_iso == ps$region_iso) %>%
-  mutate(date = ISOWeekDateToDate(iso_year, iso_week)) %>%
-  rename(
-    q50 = paste0('xc2_', ps$timebase, '_q50_', ps$model_id),
-    q75 = paste0('xc2_', ps$timebase, '_q70_', ps$model_id),
-    q90 = paste0('xc2_', ps$timebase, '_q90_', ps$model_id),
-    q95 = paste0('xc2_', ps$timebase, '_q95_', ps$model_id)
-  ) %>%
-  ggplot(aes(x = date)) +
-  geom_ribbon(
-    aes(ymax = q50, ymin = 0),
-    fill = prismatic::clr_lighten('blue', shift = 0.7)
-  ) +
-  geom_ribbon(
-    aes(ymax = q75, ymin = 0),
-    fill = prismatic::clr_lighten('blue', shift = 0.5)
-  ) +
-  geom_ribbon(
-    aes(ymax = q90, ymin = 0),
-    fill = prismatic::clr_lighten('blue', shift = 0.3)
-  ) +
-  geom_ribbon(
-    aes(ymax = q95, ymin = 0),
-    fill = prismatic::clr_lighten('blue', shift = 0.1)
-  ) +
-  geom_hline(yintercept = 0, color = 'grey20') +
-  facet_grid(age_group ~ sex, scales = 'free_y') +
-  scale_x_date(
-    date_breaks = '1 year', date_labels = '%Y',
-    limits = as.Date(c('2020-03-01', '2021-01-01'))
-  ) +
-  figspec$MyGGplotTheme() +
-  labs(
-    title = paste(ps$region_iso, ps$model_id),
-    y = paste('xc2', ps$timebase)
-  )
-
-# Total P-scores under different models ---------------------------
-
-ps <- list(
+fig$pscores$config <- list(
   region_iso = 'DE',
   timebase = 'cum',
   measure = 'psc'
 )
 
-de_cumpsc <-
+fig$pscores$data <-
   excess$excess_measures %>%
-  filter(region_iso == ps$region_iso, age_group == 'Total') %>%
+  filter(region_iso == fig$pscores$config$region_iso, age_group == 'Total') %>%
   mutate(date = ISOWeekDateToDate(iso_year, iso_week)) %>%
   rename(
-    psc = 'psc_wkl_q50',
-    q05 = paste0(ps$measure, '_', ps$timebase, '_q05'),
-    q25 = paste0(ps$measure, '_', ps$timebase, '_q25'),
-    q50 = paste0(ps$measure, '_', ps$timebase, '_q50'),
-    q75 = paste0(ps$measure, '_', ps$timebase, '_q75'),
-    q95 = paste0(ps$measure, '_', ps$timebase, '_q95')
-  ) %>%
-  ggplot(aes(x = date)) +
+    q05 = paste0(fig$pscores$config$measure, '_', fig$pscores$config$timebase, '_q05'),
+    q25 = paste0(fig$pscores$config$measure, '_', fig$pscores$config$timebase, '_q25'),
+    q50 = paste0(fig$pscores$config$measure, '_', fig$pscores$config$timebase, '_q50'),
+    q75 = paste0(fig$pscores$config$measure, '_', fig$pscores$config$timebase, '_q75'),
+    q95 = paste0(fig$pscores$config$measure, '_', fig$pscores$config$timebase, '_q95')
+  )
+fig$pscores$labels <-
+  fig$pscores$data %>% 
+  filter(date == max(date))
+
+fig$pscores$fig <-
+  fig$pscores$data %>%
+  ggplot(aes(x = date, group = model_id)) +
+  geom_hline(yintercept = 0, color = 'black') +
   geom_ribbon(
     aes(ymax = q95, ymin = q05),
     fill = prismatic::clr_lighten('blue', shift = 0.7)
@@ -342,32 +223,123 @@ de_cumpsc <-
     aes(ymax = q75, ymin = q25),
     fill = prismatic::clr_lighten('blue', shift = 0.5)
   ) +
-  geom_line(
-    aes(y = q50, group = model_id2),
-    color = 'grey80', alpha = 0.5,
-    data = . %>% rename(model_id2 = model_id)
-  ) +
-  #geom_point(aes(y = psc)) +
   geom_line(aes(y = q50)) +
-  geom_hline(yintercept = 0, color = 'grey20') +
-  facet_grid(sex ~ model_id) +
-  scale_x_date(
-    date_breaks = '2 months', date_labels = '%b',
-    limits = as.Date(c('2020-03-01', '2020-12-31'))
+  geom_line(
+    aes(x = date, y = q50, group = group),
+    data = fig$pscores$data %>% rename(group = model_id),
+    inherit.aes = FALSE, alpha = 0.3
   ) +
-  scale_y_continuous(breaks = seq(-0.1, 0.1, 0.05), labels = scales::percent) +
-  coord_cartesian(ylim = c(-0.1, 0.1)) +
-  figspec$MyGGplotTheme(family = 'roboto', panel_border = TRUE) +
+  geom_label(
+    aes(
+      x = date, y = q50,
+      label = paste0(
+        formatC(q50*100, format = 'f', flag = '+', digits = 2), '%', '\n',
+        formatC(q05*100, format = 'f', digits = 2), '–',
+        formatC(q95*100, format = 'f', digits = 2)
+      )
+    ),
+    hjust = 1, size = 3, vjust = 1,
+    label.padding = unit(1, 'pt'), label.size = 0, label.r = unit(0, 'pt'),
+    data = fig$pscores$labels,
+    inherit.aes = FALSE,
+    color = 'black', alpha = 0.7
+  ) +
+  scale_x_date(date_breaks = '2 months', date_labels = '%b') +
+  scale_y_continuous(labels = scales::label_percent()) +
+  scale_color_identity() +
+  scale_fill_identity() +
+  figspec$MyGGplotTheme(grid = 'xy', panel_border = FALSE, axis = '') +
+  facet_grid(sex~model_id) +
+  coord_cartesian(expand = FALSE) +
   labs(
-    x = NULL,
-    title = 'Cumulative percent excess death March 2020 through December 2020 in Germany',
-    y = 'Cumulative P-score',
-    caption = '95 and 50% prediction intervals\nAVC: 5 year avg. weekly death counts\nAVR: 5 year avg. weekly death rates\nGAM: Quasi-Poisson regression with smooth seasonality and control for mortality trends and population structure\nLGM: Quasi-Poisson regression with smooth seasonality, autocorrelation, and control for mortality trends and population structure\nSRF: Quasi-Poisson regression in Serfling specification trained on all weeks with control for population structure'
+    x = NULL, y = 'Cumulative percent excess deaths',
+    title = 'Cumulative percent excess deaths Germany 2020w8 through 2020w52 under different baseline models',
+    caption = '95 and 50% prediction intervals\nAVC: 5 year avg. weekly death counts\nAVR: 5 year avg. weekly death rates\nGAM: Quasi-Poisson regression with smooth seasonality and control for mortality trends and population structure\nLGM: Quasi-Poisson regression with smooth seasonality, autocorrelation, and control for mortality trends and population structure\nSRF: Quasi-Poisson regression in Serfling specification trained on all weeks with control for population structure',
+    family = 'roboto'
   )
-de_cumpsc
+fig$pscores$fig
 
 ExportFigure(
-  de_cumpsc, path = path$out, filename = 'de_cumpsc',
+  fig$pscores$fig, path = path$out, filename = 'cumpscores',
+  device = 'pdf',
+  width = figspec$fig_dims$width,
+  height = figspec$fig_dims$width*0.8, scale = 1.2
+)
+
+# Cumulative excess -----------------------------------------------
+
+fig$cumexcess <- list()
+
+fig$cumexcess$config <- list(
+  region_iso = 'DE',
+  timebase = 'cum',
+  measure = 'xc1'
+)
+
+fig$cumexcess$data <-
+  excess$excess_measures %>%
+  filter(region_iso == fig$cumexcess$config$region_iso, age_group == 'Total') %>%
+  mutate(date = ISOWeekDateToDate(iso_year, iso_week)) %>%
+  rename(
+    q05 = paste0(fig$cumexcess$config$measure, '_', fig$cumexcess$config$timebase, '_q05'),
+    q25 = paste0(fig$cumexcess$config$measure, '_', fig$cumexcess$config$timebase, '_q25'),
+    q50 = paste0(fig$cumexcess$config$measure, '_', fig$cumexcess$config$timebase, '_q50'),
+    q75 = paste0(fig$cumexcess$config$measure, '_', fig$cumexcess$config$timebase, '_q75'),
+    q95 = paste0(fig$cumexcess$config$measure, '_', fig$cumexcess$config$timebase, '_q95')
+  )
+fig$cumexcess$labels <-
+  fig$cumexcess$d %>% 
+  filter(date == max(date))
+
+fig$cumexcess$fig <-
+  fig$cumexcess$data %>%
+  ggplot(aes(x = date, group = model_id)) +
+  geom_hline(yintercept = 0, color = 'black') +
+  geom_ribbon(
+    aes(ymax = q95, ymin = q05),
+    fill = prismatic::clr_lighten('blue', shift = 0.7)
+  ) +
+
+  geom_line(aes(y = q50)) +
+  geom_line(
+    aes(x = date, y = q50, group = group),
+    data = fig$cumexcess$data %>% rename(group = model_id),
+    inherit.aes = FALSE, alpha = 0.3
+  ) +
+  geom_label(
+    aes(
+      x = date, y = q50,
+      label = paste0(
+        formatC(q50, format = 'd', big.mark = ','),
+        '\n', formatC(q05, format = 'd', big.mark = ','),
+        '–', formatC(q95, format = 'd', big.mark = ',')
+      )
+    ),
+    family = 'robotocondensed',
+    hjust = 1, size = 3, vjust = 1,
+    label.padding = unit(1, 'pt'), label.size = 0, label.r = unit(0, 'pt'),
+    data = fig$cumexcess$labels,
+    inherit.aes = FALSE,
+    color = 'black', alpha = 0.7
+  ) +
+  scale_x_date(date_breaks = '2 months', date_labels = '%b') +
+  scale_y_continuous(labels = scales::label_comma()) +
+  scale_color_identity() +
+  scale_fill_identity() +
+  figspec$MyGGplotTheme(grid = 'xy', panel_border = FALSE, axis = '') +
+  facet_grid(sex~model_id) +
+  coord_cartesian(expand = FALSE) +
+  labs(
+    x = NULL, y = 'Cumulative number of excess deaths',
+    subtitle = 'Weekly excess deaths were allowed to be negative',
+    title = 'Cumulative excess deaths Germany 2020w8 through 2020w52 under different baseline models',
+    caption = '95 and 50% prediction intervals\nAVC: 5 year avg. weekly death counts\nAVR: 5 year avg. weekly death rates\nGAM: Quasi-Poisson regression with smooth seasonality and control for mortality trends and population structure\nLGM: Quasi-Poisson regression with smooth seasonality, autocorrelation, and control for mortality trends and population structure\nSRF: Quasi-Poisson regression in Serfling specification trained on all weeks with control for population structure',
+    family = 'roboto'
+  )
+fig$cumexcess
+
+ExportFigure(
+  fig$cumexcess$fig, path = path$out, filename = 'cumexcess',
   device = 'pdf',
   width = figspec$fig_dims$width,
   height = figspec$fig_dims$width*0.8, scale = 1.2
