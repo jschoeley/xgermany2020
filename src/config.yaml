@@ -1,0 +1,20 @@
+forecast:
+  # number of weeks to forecast
+  forecast_n_weeks: 44
+  # iso-week which starts epi-year
+  start_of_epi_year_iso_week: 27
+  # iso-week which starts test/prediction period
+  start_of_test_iso_week: 8
+skeleton:
+  year:
+    min: 2020
+    max: 2020
+  week:
+    min: 1
+    max: 52
+  age_start: {'[0,15)': 0, '[15,65)': 15, '[65,75)': 65, '[75,85)': 75, '85+': 85}
+  age_width: {'[0,15)': 15, '[15,65)': 50, '[65,75)': 10, '[75,85)': 10, '85+': Inf}
+  sex: {Male: 'Male', Female: 'Female'}
+  region: [
+    'DE'
+]

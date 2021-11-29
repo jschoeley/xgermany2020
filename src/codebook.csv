@@ -1,0 +1,39 @@
+region_code,region_code_stmf,region_code_coverage,region_name,region_level,country_name,hemisphere,continent
+AT,AUT,Austria,Austria,0,Austria,n,Europe
+AU,AUS2,Australia,Australia,0,Australia,s,Oceania
+BE,BEL,Belgium,Belgium,0,Belgium,n,Europe
+BG,BGR,Bulgaria,Bulgaria,0,Bulgaria,n,Europe
+CA,CAN,Canada,Canada,0,Canada,n,North America
+CH,CHE,Switzerland,Switzerland,0,Switzerland,n,Europe
+CL,CHL,Chile,Chile,0,Chile,s,South America
+CZ,CZE,Czechia,Czech Republic,0,Czech Republic,n,Europe
+DE,DEUTNP,Germany,Germany,0,Germany,n,Europe
+DK,DNK,Denmark,Denmark,0,Denmark,n,Europe
+EE,EST,Estonia,Estonia,0,Estonia,n,Europe
+ES,ESP,Spain,Spain,0,Spain,n,Europe
+FI,FIN,Finland,Finland,0,Finland,n,Europe
+FR,FRATNP,France,France,0,France,n,Europe
+GB-EAW,GBRTENW,England and Wales,England and Wales,1,Great Britain,n,Europe
+GB-NIR,GBR_NIR,Northern Ireland,Northern Ireland,1,Great Britain,n,Europe
+GB-SCT,GBR_SCO,Scotland,Scotland,1,Great Britain,n,Europe
+GR,GRC,Greece,Greece,0,Greece,n,Europe
+HR,HRV,Croatia,Croatia,0,Croatia,n,Europe
+HU,HUN,Hungary,Hungary,0,Hungary,n,Europe
+IL,ISR,Israel,Israel,0,Israel,n,Asia
+IS,ISL,Iceland,Iceland,0,Iceland,n,Europe
+IT,ITA,Italy,Italy,0,Italy,n,Europe
+KR,KOR,South Korea,South Korea,0,South Korea,n,Asia
+LT,LTU,Lithuania,Lithuania,0,Lithuania,n,Europe
+LU,LUX,Luxembourg,Luxembourg,0,Luxembourg,n,Europe
+LV,LVA,Latvia,Latvia,0,Latvia,n,Europe
+NL,NLD,Netherlands,Netherlands,0,Netherlands,n,Europe
+NO,NOR,Norway,Norway,0,Norway,n,Europe
+NZ,NZL_NP,New Zealand,New Zealand,0,New Zealand,s,Oceania
+PL,POL,Poland,Poland,0,Poland,n,Europe
+PT,PRT,Portugal,Portugal,0,Portugal,n,Europe
+RU,RUS,Russia,Russia,0,Russia,n,Asia
+SE,SWE,Sweden,Sweden,0,Sweden,n,Europe
+SI,SVN,Slovenia,Slovenia,0,Slovenia,n,Europe
+SK,SVK,Slovakia,Slovakia,0,Slovakia,n,Europe
+TW,TWN,Taiwan ,Taiwan ,0,Taiwan ,n,Asia
+US,USA,USA,USA,0,USA,n,North America

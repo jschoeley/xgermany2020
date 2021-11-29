@@ -1,0 +1,6 @@
+code,name
+AVC,5-year avg. weekly deaths
+AVR,5-year avg. weekly mortality
+SRF,Serfling Quasi-Poisson regression
+GAM,GAM Quasi-Poisson regression
+LGM,Latent Gaussian Poisson regression
