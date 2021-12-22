@@ -1,10 +1,10 @@
 forecast:
   # number of weeks to forecast
-  forecast_n_weeks: 44
+  forecast_n_weeks: 52
   # iso-week which starts epi-year
   start_of_epi_year_iso_week: 27
   # iso-week which starts test/prediction period
-  start_of_test_iso_week: 8
+  start_of_test_iso_week: 1
 skeleton:
   year:
     min: 2020

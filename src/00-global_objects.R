@@ -1,19 +1,5 @@
 # Global constants and functions
 
-# Global constants ------------------------------------------------
-
-# glob <- list()
-# glob <- within(glob, {
-# 
-#   # iso-week which starts epi-year
-#   start_of_epi_year_iso_week = 27
-#   # iso-week which starts test/prediction period
-#   start_of_test_iso_week = 8
-#   # weeks to forecast
-#   forecast_n_weeks = 52*3
-#   
-# })
-
 # Figure specification --------------------------------------------
 
 # fonts

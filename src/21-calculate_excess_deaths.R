@@ -49,18 +49,29 @@ excess$varnames_simdeath <-
 excess$quantiles1 <- c('q05' = 0.05, 'q25' = 0.25, 'q50' = 0.5, 'q75' = 0.75, 'q95' = 0.95)
 excess$quantiles2 <- c('q50' = 0.5, 'q70' = 0.70, 'q90' = 0.9, 'q95' = 0.95, 'q99' = 0.99)
 
-# add totals by age
+# add totals by age and sex
 excess$observed_and_expected <-
   observed_and_expected %>%
+  # add totals by age
   group_by(cv_id, region_iso, model_id, sex, iso_year, iso_week, date) %>%
   group_modify(~{
     .x %>% bind_rows(summarise(.,
       across(c(personweeks, deaths_predicted, deaths_observed, starts_with('deaths_sim')), sum),
       across(c(age_group), ~'Total')))
   }) %>%
+  # add totals by sex
   ungroup() %>%
+  group_by(cv_id, region_iso, model_id, age_group, iso_year, iso_week, date) %>%
+  group_modify(~{
+    .x %>% bind_rows(summarise(
+      .,
+      across(c(personweeks, deaths_predicted, deaths_observed, starts_with('deaths_sim')), sum),
+      across(c(sex), ~'Total'))
+    )
+  }) %>%
   arrange(cv_id, model_id, region_iso, sex, age_group, date) %>%
-  select(-obs_id)
+  select(-obs_id) %>%
+  ungroup()
 
 # nest by model id and stratum
 excess$observed_and_expected <-
@@ -198,7 +209,7 @@ fig$pscores$config <- list(
 
 fig$pscores$data <-
   excess$excess_measures %>%
-  filter(region_iso == fig$pscores$config$region_iso, age_group == 'Total') %>%
+  filter(region_iso == fig$pscores$config$region_iso, age_group == 'Total', sex == 'Total') %>%
   mutate(date = ISOWeekDateToDate(iso_year, iso_week)) %>%
   rename(
     q05 = paste0(fig$pscores$config$measure, '_', fig$pscores$config$timebase, '_q05'),
@@ -248,13 +259,13 @@ fig$pscores$fig <-
   scale_y_continuous(labels = scales::label_percent()) +
   scale_color_identity() +
   scale_fill_identity() +
-  figspec$MyGGplotTheme(grid = 'xy', panel_border = FALSE, axis = '') +
-  facet_grid(sex~model_id) +
+  figspec$MyGGplotTheme(grid = 'xy', panel_border = TRUE, axis = '') +
+  facet_wrap(~model_id, nrow = 1) +
   coord_cartesian(expand = FALSE) +
   labs(
     x = NULL, y = 'Cumulative percent excess deaths',
-    title = 'Cumulative percent excess deaths Germany 2020w8 through 2020w52 under different baseline models',
-    caption = '95 and 50% prediction intervals\nAVC: 5 year avg. weekly death counts\nAVR: 5 year avg. weekly death rates\nGAM: Quasi-Poisson regression with smooth seasonality and control for mortality trends and population structure\nLGM: Quasi-Poisson regression with smooth seasonality, autocorrelation, and control for mortality trends and population structure\nSRF: Quasi-Poisson regression in Serfling specification trained on all weeks with control for population structure',
+    title = 'Cumulative percent excess deaths Germany 2020w1 through 2020w52 under different baseline models',
+    caption = '95 and 50% prediction intervals\nAVC: 5 year avg. weekly death counts\nAVR: 5 year avg. weekly death rates\nGAM: Quasi-Poisson regression with smooth seasonality and control for mortality trends and population structure\nLGM: Quasi-Poisson regression with smooth seasonality, autocorrelation, and control for mortality trends and population structure\nSRF: Quasi-Poisson regression in Serfling specification trained on all weeks with control for population structure\nJonas Schöley, PhD. Data: STMF mortality.org Dec 22 2021, Code: github.com/jschoeley/xgermany2020',
     family = 'roboto'
   )
 fig$pscores$fig
@@ -263,7 +274,7 @@ ExportFigure(
   fig$pscores$fig, path = path$out, filename = 'cumpscores',
   device = 'pdf',
   width = figspec$fig_dims$width,
-  height = figspec$fig_dims$width*0.8, scale = 1.2
+  height = figspec$fig_dims$width*0.4, scale = 1.2
 )
 
 # Cumulative excess -----------------------------------------------
@@ -278,7 +289,7 @@ fig$cumexcess$config <- list(
 
 fig$cumexcess$data <-
   excess$excess_measures %>%
-  filter(region_iso == fig$cumexcess$config$region_iso, age_group == 'Total') %>%
+  filter(region_iso == fig$cumexcess$config$region_iso, age_group == 'Total', sex == 'Total') %>%
   mutate(date = ISOWeekDateToDate(iso_year, iso_week)) %>%
   rename(
     q05 = paste0(fig$cumexcess$config$measure, '_', fig$cumexcess$config$timebase, '_q05'),
@@ -294,12 +305,15 @@ fig$cumexcess$labels <-
 fig$cumexcess$fig <-
   fig$cumexcess$data %>%
   ggplot(aes(x = date, group = model_id)) +
-  geom_hline(yintercept = 0, color = 'black') +
+  geom_hline(yintercept = 0, color = 'grey') +
   geom_ribbon(
     aes(ymax = q95, ymin = q05),
     fill = prismatic::clr_lighten('blue', shift = 0.7)
   ) +
-
+  geom_ribbon(
+    aes(ymax = q75, ymin = q25),
+    fill = prismatic::clr_lighten('blue', shift = 0.5)
+  ) +
   geom_line(aes(y = q50)) +
   geom_line(
     aes(x = date, y = q50, group = group),
@@ -326,14 +340,13 @@ fig$cumexcess$fig <-
   scale_y_continuous(labels = scales::label_comma()) +
   scale_color_identity() +
   scale_fill_identity() +
-  figspec$MyGGplotTheme(grid = 'xy', panel_border = FALSE, axis = '') +
-  facet_grid(sex~model_id) +
+  figspec$MyGGplotTheme(grid = 'xy', panel_border = TRUE, axis = '') +
+  facet_wrap(~model_id, nrow = 1) +
   coord_cartesian(expand = FALSE) +
   labs(
     x = NULL, y = 'Cumulative number of excess deaths',
-    subtitle = 'Weekly excess deaths were allowed to be negative',
-    title = 'Cumulative excess deaths Germany 2020w8 through 2020w52 under different baseline models',
-    caption = '95 and 50% prediction intervals\nAVC: 5 year avg. weekly death counts\nAVR: 5 year avg. weekly death rates\nGAM: Quasi-Poisson regression with smooth seasonality and control for mortality trends and population structure\nLGM: Quasi-Poisson regression with smooth seasonality, autocorrelation, and control for mortality trends and population structure\nSRF: Quasi-Poisson regression in Serfling specification trained on all weeks with control for population structure',
+    title = 'Cumulative excess deaths Germany 2020w1 through 2020w52 under different baseline models',
+    caption = '95 and 50% prediction intervals\nAVC: 5 year avg. weekly death counts\nAVR: 5 year avg. weekly death rates\nGAM: Quasi-Poisson regression with smooth seasonality and control for mortality trends and population structure\nLGM: Quasi-Poisson regression with smooth seasonality, autocorrelation, and control for mortality trends and population structure\nSRF: Quasi-Poisson regression in Serfling specification trained on all weeks with control for population structure\nJonas Schöley, PhD. Data: STMF mortality.org Dec 22 2021, Code: github.com/jschoeley/xgermany2020',
     family = 'roboto'
   )
 fig$cumexcess
@@ -342,5 +355,5 @@ ExportFigure(
   fig$cumexcess$fig, path = path$out, filename = 'cumexcess',
   device = 'pdf',
   width = figspec$fig_dims$width,
-  height = figspec$fig_dims$width*0.8, scale = 1.2
+  height = figspec$fig_dims$width*0.4, scale = 1.2
 )
